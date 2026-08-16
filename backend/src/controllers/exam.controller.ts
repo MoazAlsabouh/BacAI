@@ -25,12 +25,19 @@ export const generatePdfBooklet = async (req: Request, res: Response): Promise<v
     }
 
     // 1. Fetch Template
-    const template = await prisma.examTemplate.findUnique({
-      where: { id: templateId as string }
-    });
+    let template = null;
+    if (templateId && templateId !== 'template-uuid') {
+      template = await prisma.examTemplate.findUnique({
+        where: { id: templateId as string }
+      });
+    } else {
+      template = await prisma.examTemplate.findFirst({
+        where: { subjectId: subjectId as string }
+      });
+    }
 
     if (!template) {
-      res.status(404).json({ error: 'Template not found' });
+      res.status(404).json({ error: 'لم يتم العثور على أي قالب امتحاني لهذه المادة. يرجى من المشرف إضافة قالب.' });
       return;
     }
 
@@ -110,12 +117,19 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
     const { subjectId, templateId } = req.body;
     
     // 1. Fetch Template
-    const template = await prisma.examTemplate.findUnique({
-      where: { id: templateId as string }
-    });
+    let template = null;
+    if (templateId) {
+      template = await prisma.examTemplate.findUnique({
+        where: { id: templateId as string }
+      });
+    } else {
+      template = await prisma.examTemplate.findFirst({
+        where: { subjectId: subjectId as string }
+      });
+    }
 
     if (!template) {
-      res.status(404).json({ error: 'القالب الامتحاني غير موجود' });
+      res.status(404).json({ error: 'لم يتم العثور على أي قالب امتحاني لهذه المادة. يرجى من المشرف إضافة قالب.' });
       return;
     }
 
