@@ -61,7 +61,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       أنت خبير تعليمي في المناهج السورية (البكالوريا).
       المهمة: استخراج وتوليد أسئلة امتحانية من الملف المرفق.
       **هام جداً:** 
-      1- استخرج حوالي 25 إلى 35 سؤالاً لضمان الجودة وعدم انقطاع النص. يجب أن تغطي الأسئلة أهم الأفكار.
+      1- استخرج كافة الأسئلة الممكنة التي تغطي جميع أفكار وصفحات الملف بالكامل دون استثناء (استخرج 100 سؤال على الأقل أو أكثر إن كان الملف يسمح بذلك). لا تكتفي بتقديم عينة صغيرة أبداً.
       2- **يجب** وضع كافة المتغيرات والمعادلات والرموز الرياضية بين علامتي $، ولكن **يجب** أن تكون علامة الدولار $ دائماً **داخل علامات التنصيص (Quotes)** الخاصة بالـ JSON (مثال صحيح: "correctAnswer": "$f(x) = x^2$").
       3- **هام لـ LaTeX:** عند كتابة أوامر LaTeX داخل الـ JSON، **يجب** مضاعفة الشرطة المائلة (Double Backslash) لكي لا ينهار الملف (مثال: اكتب "\\\\frac" بدلاً من "\\frac"، واكتب "\\\\infty" بدلاً من "\\infty").
       - صنف كل سؤال إلى: MCQ (أتمتة)، ESSAY (مقالي)، MATH (مسألة).
@@ -119,19 +119,67 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     // This safely doubles single backslashes that are not escaping a quote or another backslash
     generatedText = generatedText.replace(/(?<!\\)\\(?![\\"])/g, '\\\\');
 
-    // 3. Repair completely broken JSON structures (like missing quotes, trailing commas)
-    try {
-      generatedText = jsonrepair(generatedText);
-    } catch (repairErr) {
-      console.warn("jsonrepair failed, proceeding with original text:", repairErr);
-    }
+    // 3. Robust JSON Object Extractor
+    // Extract individual JSON objects from the array to gracefully skip any corrupted elements
+    let parsedData: any[] = [];
+    
+    if (type === 'TEMPLATE') {
+      try {
+        parsedData = JSON.parse(jsonrepair(generatedText));
+      } catch (e) {
+        throw new Error("فشل في قراءة القالب. يرجى التأكد من التنسيق.");
+      }
+    } else {
+      let depth = 0;
+      let start = -1;
+      let inString = false;
+      let escape = false;
 
-    let parsedData;
-    try {
-      parsedData = JSON.parse(generatedText);
-    } catch (parseError: any) {
-      console.error("JSON parsing failed. Truncated output? Length:", generatedText.length);
-      throw new Error(`تعذر معالجة المخرجات لأن النص المولد غير مكتمل أو منسق بشكل خاطئ (حجم الاستجابة تجاوز الحد المسموح). يرجى تقليل حجم الملف وتجربة ملف أصغر.`);
+      for (let i = 0; i < generatedText.length; i++) {
+        const char = generatedText[i];
+        
+        if (inString) {
+          if (escape) escape = false;
+          else if (char === '\\') escape = true;
+          else if (char === '"') inString = false;
+          continue;
+        }
+
+        if (char === '"') {
+          inString = true;
+          continue;
+        }
+
+        if (char === '{') {
+          if (depth === 0) start = i;
+          depth++;
+        } else if (char === '}') {
+          depth--;
+          if (depth === 0 && start !== -1) {
+            const objStr = generatedText.substring(start, i + 1);
+            try {
+              parsedData.push(JSON.parse(jsonrepair(objStr)));
+            } catch (e) {
+              console.warn("Skipped a malformed object:", e);
+            }
+            start = -1;
+          }
+        }
+      }
+
+      // Handle trailing truncated object if generation stopped abruptly
+      if (depth > 0 && start !== -1) {
+        const objStr = generatedText.substring(start);
+        try {
+          parsedData.push(JSON.parse(jsonrepair(objStr)));
+        } catch (e) {
+          console.warn("Skipped a trailing truncated object:", e);
+        }
+      }
+
+      if (parsedData.length === 0) {
+        throw new Error("لم يتم العثور على أسئلة صحيحة في مخرجات الذكاء الاصطناعي.");
+      }
     }
 
     if (type === 'TEMPLATE') {
