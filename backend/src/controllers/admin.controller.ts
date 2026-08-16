@@ -1,0 +1,70 @@
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export const getStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const totalSubjects = await prisma.subject.count();
+    const totalQuestions = await prisma.question.count();
+    const totalExams = await prisma.exam.count();
+    const totalAttempts = await prisma.studentAttempt.count();
+    
+    const attempts = await prisma.studentAttempt.findMany({
+      where: { totalScore: { not: null } },
+      select: { totalScore: true }
+    });
+    
+    let averageScore = 0;
+    if (attempts.length > 0) {
+      const sum = attempts.reduce((acc, curr) => acc + (curr.totalScore || 0), 0);
+      averageScore = Math.round((sum / attempts.length) * 10) / 10;
+    }
+
+    res.status(200).json({
+      totalSubjects,
+      totalQuestions,
+      totalExams,
+      totalAttempts,
+      averageScore
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+};
+
+export const getQuestions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { subjectId } = req.query;
+    
+    const whereClause = subjectId ? { subjectId: String(subjectId) } : {};
+    
+    const questions = await prisma.question.findMany({
+      where: whereClause,
+      include: {
+        subject: { select: { name: true } },
+        source: { select: { title: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+};
+
+export const deleteQuestion = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  try {
+    await prisma.question.delete({
+      where: { id }
+    });
+    res.status(200).json({ message: 'تم حذف السؤال بنجاح' });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    res.status(500).json({ error: 'فشل في حذف السؤال' });
+  }
+};
