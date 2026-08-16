@@ -164,7 +164,20 @@ export default function Statistics() {
         ) : loadingSubject && !subjectStats ? (
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
         ) : subjectStats ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            {/* Total Questions for Subject */}
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-blue-900">إجمالي الأسئلة المتوفرة في البنك</h3>
+                <p className="text-sm text-blue-700 mt-1">لهذه المادة التخصصية</p>
+              </div>
+              <div className="text-4xl font-bold text-primary flex items-center gap-2">
+                <Database size={32} />
+                {subjectStats.totalQuestions}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Pie Chart: Questions by Type */}
             <div className="border border-gray-200 rounded-2xl p-6">
@@ -212,6 +225,7 @@ export default function Statistics() {
               </div>
             </div>
 
+          </div>
           </div>
         ) : null}
       </div>
