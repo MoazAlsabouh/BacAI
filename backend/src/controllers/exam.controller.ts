@@ -112,7 +112,7 @@ export const generatePdfBooklet = async (req: Request, res: Response): Promise<v
 
   } catch (error: any) {
     console.error('Error generating PDF exams:', error);
-    res.status(500).json({ error: error.message || 'Internal server error during exam generation' });
+    res.status(400).json({ error: error.message || 'Internal server error during exam generation' });
   }
 };
 
@@ -189,7 +189,8 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
     res.status(201).json({ attemptId: attempt.id });
   } catch (error: any) {
     console.error('Error starting exam:', error);
-    res.status(500).json({ error: 'فشل في بدء الامتحان' });
+    // Send the actual error message to the frontend so the user knows what to do
+    res.status(400).json({ error: error.message || 'فشل في بدء الامتحان' });
   }
 };
 
