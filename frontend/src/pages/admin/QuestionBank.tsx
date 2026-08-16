@@ -150,14 +150,14 @@ export default function QuestionBank() {
                   </div>
                   
                   <h4 className="text-lg font-medium text-gray-800 mb-4 leading-relaxed" dir="ltr" style={{ textAlign: 'right' }}>
-                    <Latex>{q.content}</Latex>
+                    <Latex strict={false}>{q.content}</Latex>
                   </h4>
                   
                   {q.type === 'MCQ' && q.options && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                       {q.options.map((opt: string, idx: number) => (
                         <div key={idx} className={`p-3 rounded-lg border text-sm flex items-center justify-end ${opt === q.correctAnswer ? 'bg-green-50 border-green-200 text-green-800 font-bold' : 'bg-white border-gray-200 text-gray-600'}`} dir="ltr" style={{ textAlign: 'right' }}>
-                          <Latex>{opt}</Latex>
+                          <Latex strict={false}>{opt}</Latex>
                         </div>
                       ))}
                     </div>
