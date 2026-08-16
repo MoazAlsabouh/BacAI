@@ -9,6 +9,42 @@ function getRandomItems<T>(arr: T[], n: number): T[] {
   return shuffled.slice(0, n);
 }
 
+// Helper to pick best questions matching requested topics while keeping randomness among same-scored items
+function pickBestQuestions(pool: any[], count: number, sectionTopics: string[]) {
+  if (!sectionTopics || sectionTopics.length === 0) {
+    return getRandomItems(pool, count);
+  }
+  
+  const scored = pool.map(q => ({
+    ...q,
+    topicScore: (q.topics || []).filter((t: string) => sectionTopics.includes(t)).length
+  }));
+
+  const groups = new Map<number, any[]>();
+  for (const q of scored) {
+    if (!groups.has(q.topicScore)) groups.set(q.topicScore, []);
+    groups.get(q.topicScore)!.push(q);
+  }
+  
+  const sortedScores = Array.from(groups.keys()).sort((a, b) => b - a);
+  const selected: any[] = [];
+  
+  for (const score of sortedScores) {
+    if (selected.length >= count) break;
+    const group = groups.get(score)!;
+    const shuffledGroup = getRandomItems(group, group.length);
+    const needed = count - selected.length;
+    selected.push(...shuffledGroup.slice(0, needed));
+  }
+  
+  // Clean up the temporary score property
+  return selected.map(q => {
+    const cleanQ = { ...q };
+    delete cleanQ.topicScore;
+    return cleanQ;
+  });
+}
+
 export const generatePdfBooklet = async (req: Request, res: Response): Promise<void> => {
   try {
     const { subjectId, templateId, examCount } = req.query;
@@ -90,7 +126,7 @@ export const generatePdfBooklet = async (req: Request, res: Response): Promise<v
           throw new Error(`Not enough ${section.type} questions in the bank. Need ${section.count}, found ${poolToUse.length}.`);
         }
 
-        const selectedQuestions = getRandomItems(poolToUse, section.count);
+        const selectedQuestions = pickBestQuestions(poolToUse, section.count, section.topics || []);
         selectedQuestions.forEach(q => usedQuestionIds.add(q.id));
         
         examInstance.sections.push({
@@ -163,8 +199,8 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
         throw new Error(`لا يوجد أسئلة كافية من نوع ${section.type}. مطلوب ${section.count} ومتاح ${eligibleQuestions.length} (بعد استبعاد المكرر).`);
       }
 
-      // Pick random questions matching count
-      const chosen = getRandomItems(eligibleQuestions, section.count);
+      // Pick best matching questions based on topics
+      const chosen = pickBestQuestions(eligibleQuestions, section.count, section.topics || []);
       chosen.forEach(q => usedQuestionIds.add(q.id));
       selectedQuestions = [...selectedQuestions, ...chosen];
     }
