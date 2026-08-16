@@ -24,7 +24,9 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     // Upload file directly to Gemini to save RAM
     const uploadResult = await ai.files.upload({
       file: file.path,
-      mimeType: file.mimetype || 'text/plain',
+      config: {
+        mimeType: file.mimetype || 'text/plain',
+      }
     });
 
     // Create the SourceMaterial record first
@@ -77,7 +79,9 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     });
 
     // Clean up file from Gemini after processing
-    await ai.files.delete({ name: uploadResult.name });
+    if (uploadResult.name) {
+      await ai.files.delete({ name: uploadResult.name });
+    }
 
     const generatedText = response.text;
     if (!generatedText) throw new Error("No text generated from AI");
