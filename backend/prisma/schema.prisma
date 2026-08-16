@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Subject {
+  id        String     @id @default(uuid())
+  name      String
+  materials SourceMaterial[]
+  questions Question[]
+}
+
+enum MaterialType {
+  BOOK
+  PAST_EXAM
+  SUMMARY
+  TEMPLATE
+  OTHER
+}
+
+model SourceMaterial {
+  id        String       @id @default(uuid())
+  title     String
+  type      MaterialType
+  subjectId String
+  subject   Subject      @relation(fields: [subjectId], references: [id])
+  questions Question[]
+  createdAt DateTime     @default(now())
+}
+
+enum QuestionType {
+  MCQ
+  ESSAY
+  MATH
+}
+
+model Question {
+  id              String       @id @default(uuid())
+  type            QuestionType
+  difficulty      Int
+  content         String
+  options         Json?
+  correctAnswer   String?
+  rubric          String?
+  
+  subjectId       String
+  subject         Subject      @relation(fields: [subjectId], references: [id])
+  sourceId        String?
+  source          SourceMaterial? @relation(fields: [sourceId], references: [id])
+  
+  topics          String[]
+  
+  examQuestions   ExamQuestion[]
+  createdAt       DateTime     @default(now())
+}
+
+model ExamTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  rules     Json
+  subjectId String
+}
+
+model Exam {
+  id           String         @id @default(uuid())
+  title        String?
+  isStatic     Boolean        @default(false)
+  linkToken    String?        @unique
+  questions    ExamQuestion[]
+  attempts     StudentAttempt[]
+  createdAt    DateTime       @default(now())
+}
+
+model ExamQuestion {
+  examId     String
+  questionId String
+  exam       Exam     @relation(fields: [examId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+  order      Int
+
+  @@id([examId, questionId])
+}
+
+model StudentAttempt {
+  id          String   @id @default(uuid())
+  studentName String?
+  examId      String
+  exam        Exam     @relation(fields: [examId], references: [id])
+  totalScore  Float?
+  answers     Answer[]
+  submittedAt DateTime @default(now())
+}
+
+model Answer {
+  id               String         @id @default(uuid())
+  attemptId        String
+  attempt          StudentAttempt @relation(fields: [attemptId], references: [id])
+  questionId       String
+  studentResponse  String
+  earnedScore      Float?
+  aiFeedback       String?
+}
