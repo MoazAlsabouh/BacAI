@@ -17,6 +17,7 @@ export default function StudentPortal() {
     try {
       const res = await fetch(`${API_URL}/api/student/subjects`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch subjects');
       setSubjects(data);
       if (data.length > 0) setSubjectId(data[0].id);
     } catch (err) {

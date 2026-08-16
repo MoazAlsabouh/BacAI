@@ -23,6 +23,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`${API_URL}/api/admin/subjects`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch subjects');
       setSubjects(data);
       if (data.length > 0 && !subjectId) setSubjectId(data[0].id);
     } catch (err) {
