@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { UploadCloud, FileText, AlertCircle, CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { UploadCloud, FileText, AlertCircle, CheckCircle2, Loader2, Plus, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [subjectId, setSubjectId] = useState('');
   const [type, setType] = useState('PAST_EXAM');
@@ -16,8 +18,14 @@ export default function AdminDashboard() {
   const [subjectLoading, setSubjectLoading] = useState(false);
 
   useEffect(() => {
+    // Check authentication
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      navigate('/admin/login');
+      return;
+    }
     fetchSubjects();
-  }, []);
+  }, [navigate]);
 
   const fetchSubjects = async () => {
     try {
@@ -92,10 +100,22 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <UploadCloud className="text-primary" />
-          رفع مادة تعليمية جديدة
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <UploadCloud className="text-primary" />
+            رفع مادة تعليمية جديدة
+          </h2>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('adminToken');
+              localStorage.removeItem('adminName');
+              navigate('/admin/login');
+            }}
+            className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 bg-red-50 px-3 py-2 rounded-lg transition-colors"
+          >
+            <LogOut size={16} /> تسجيل الخروج
+          </button>
+        </div>
         
         <p className="text-gray-500 mb-8">
           قم برفع الملفات (كتاب، دورات سابقة، أو قالب وزاري) ليقوم الذكاء الاصطناعي بتحليلها، استخراج الأسئلة وتصنيفها، أو حفظ القالب الامتحاني.
