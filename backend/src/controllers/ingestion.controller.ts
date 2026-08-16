@@ -101,17 +101,28 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       });
     } else {
       // It's questions
-      const questionsData = parsedData.map((q: any) => ({
-        type: q.type,
-        difficulty: q.difficulty,
-        content: q.content,
-        options: q.options || [],
-        correctAnswer: q.correctAnswer || null,
-        rubric: Array.isArray(q.rubric) ? q.rubric.join('\n') : (q.rubric || null),
-        topics: q.topics || [],
-        subjectId: subjectId,
-        sourceId: sourceMaterial.id
-      }));
+      const questionsData = parsedData.map((q: any) => {
+        let parsedRubric = null;
+        if (typeof q.rubric === 'string') {
+          parsedRubric = q.rubric;
+        } else if (Array.isArray(q.rubric)) {
+          parsedRubric = q.rubric.join('\n');
+        } else if (q.rubric && typeof q.rubric === 'object') {
+          parsedRubric = Object.values(q.rubric).join('\n');
+        }
+
+        return {
+          type: q.type,
+          difficulty: q.difficulty,
+          content: q.content,
+          options: q.options || [],
+          correctAnswer: q.correctAnswer || null,
+          rubric: parsedRubric,
+          topics: q.topics || [],
+          subjectId: subjectId,
+          sourceId: sourceMaterial.id
+        };
+      });
 
       await prisma.question.createMany({
         data: questionsData
