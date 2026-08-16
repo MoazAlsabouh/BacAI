@@ -405,7 +405,7 @@ export default function AdminDashboard() {
             <tbody>
               {questions.map((q) => (
                 <tr key={q.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 max-w-xs truncate" title={q.content} dir="ltr" style={{ textAlign: 'right' }}>
+                  <td className="py-3 px-4 max-w-sm whitespace-normal" dir="ltr" style={{ textAlign: 'right' }}>
                     <Latex>{q.content}</Latex>
                   </td>
                   <td className="py-3 px-4">{q.subject?.name}</td>
