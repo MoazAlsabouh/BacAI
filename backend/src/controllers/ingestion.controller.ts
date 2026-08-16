@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
+import { jsonrepair } from 'jsonrepair';
 import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 
@@ -74,7 +75,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash-lite',
+      model: 'gemini-1.5-flash',
       contents: [{ 
         role: 'user', 
         parts: [
@@ -99,6 +100,13 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     // 2. Fix unescaped single backslashes used in LaTeX (e.g. \infty -> \\infty) 
     // This safely doubles single backslashes that are not escaping a quote or another backslash
     generatedText = generatedText.replace(/(?<!\\)\\(?![\\"])/g, '\\\\');
+
+    // 3. Repair completely broken JSON structures (like missing quotes, trailing commas)
+    try {
+      generatedText = jsonrepair(generatedText);
+    } catch (repairErr) {
+      console.warn("jsonrepair failed, proceeding with original text:", repairErr);
+    }
 
     const parsedData = JSON.parse(generatedText);
 
