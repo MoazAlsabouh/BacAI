@@ -124,11 +124,13 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
     let template = null;
     if (templateId) {
       template = await prisma.examTemplate.findUnique({
-        where: { id: templateId as string }
+        where: { id: templateId as string },
+        include: { subject: true }
       });
     } else {
       template = await prisma.examTemplate.findFirst({
-        where: { subjectId: subjectId as string }
+        where: { subjectId: subjectId as string },
+        include: { subject: true }
       });
     }
 
@@ -169,7 +171,7 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
 
     const exam = await prisma.exam.create({
       data: {
-        title: `امتحان تجريبي: ${template.name}`,
+        title: `امتحان تجريبي: ${template.subject.name}`,
         questions: {
           create: selectedQuestions.map((q, idx) => ({
             questionId: q.id,

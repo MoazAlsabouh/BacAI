@@ -58,27 +58,42 @@ export default function ExamOnline() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
-    // Submit the last (or currently active) question
+    let totalScore = 0;
+    let questionsGraded = 0;
+    let allFeedbacks: { [key: string]: string } = {};
+
     try {
-      // In a real scenario, we should loop through all answered questions or submit them as the student proceeds.
-      // For this demo, we'll just submit the current one to showcase Semantic Grading
-      const res = await fetch(`${API_URL}/api/student/exams/${attemptId}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          questionId: activeQuestionData.id, 
-          studentResponse: answers[activeQuestionData.id] || '' 
-        })
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      // Loop through all questions and submit them
+      for (const qWrapper of questionsList) {
+        const q = qWrapper.question;
+        const studentResp = answers[q.id];
+        
+        // If student didn't answer, we still submit empty string to get a 0
+        const res = await fetch(`${API_URL}/api/student/exams/${attemptId}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            questionId: q.id, 
+            studentResponse: studentResp || ' ' 
+          })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        totalScore += data.result.earnedScore;
+        questionsGraded++;
+        allFeedbacks[q.id] = data.result.aiFeedback;
+      }
+
+      const maxPossibleScore = questionsList.length; // Assuming 1 point per question
+      const percentage = Math.round((totalScore / maxPossibleScore) * 100);
 
       setFeedback({
-        score: data.result.earnedScore * 100, // Assuming it returns a fraction or something
+        score: percentage,
         total: 100,
-        text: data.result.aiFeedback
+        text: "تم تصحيح كامل الامتحان.",
+        details: allFeedbacks
       });
       setIsGraded(true);
     } catch (err: any) {
@@ -97,7 +112,7 @@ export default function ExamOnline() {
           </div>
           <h2 className="text-3xl font-bold text-gray-800">تم التصحيح بنجاح!</h2>
           <div className="inline-block mt-4 text-2xl font-bold bg-blue-50 text-blue-700 px-6 py-3 rounded-xl border border-blue-100">
-            العلامة للسؤال الأخير: {feedback.score} %
+            علامة الاختبار: {feedback.score} %
           </div>
         </div>
         
@@ -119,7 +134,9 @@ export default function ExamOnline() {
                     
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                       <span className="text-sm font-bold text-gray-500 mb-1 block">إجابتك:</span>
-                      <p className="text-gray-800">{answers[q.id] || <span className="text-red-500 italic">لم تتم الإجابة</span>}</p>
+                      <p className="text-gray-800" dir="ltr" style={{ textAlign: 'right' }}>
+                        {answers[q.id] ? <Latex>{answers[q.id]}</Latex> : <span className="text-red-500 italic" dir="rtl">لم تتم الإجابة</span>}
+                      </p>
                     </div>
 
                     {q.type === 'MCQ' ? (
@@ -134,7 +151,7 @@ export default function ExamOnline() {
                           ملاحظات التصحيح الدلالي (AI)
                         </div>
                         <p className="text-gray-700 leading-relaxed text-sm">
-                          {activeQuestionData.id === q.id ? feedback.text : 'سيتم التقييم عند طلبك...'}
+                          {feedback.details ? feedback.details[q.id] : 'غير متوفر'}
                         </p>
                       </div>
                     )}
