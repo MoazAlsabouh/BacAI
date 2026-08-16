@@ -21,6 +21,9 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    // Fix Multer mojibake (latin1 to utf8) for Arabic filenames
+    const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+
     // Upload file directly to Gemini to save RAM
     const uploadResult = await ai.files.upload({
       file: file.path,
@@ -32,9 +35,9 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     // Create the SourceMaterial record first
     const sourceMaterial = await prisma.sourceMaterial.create({
       data: {
-        title: file.originalname,
+        title: originalName,
         type: type, // BOOK, PAST_EXAM, SUMMARY, TEMPLATE
-        subjectId: subjectId,
+        subjectId: subjectId
       }
     });
 

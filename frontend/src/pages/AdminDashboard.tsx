@@ -395,6 +395,7 @@ export default function AdminDashboard() {
                 <th className="pb-3 px-4">السؤال</th>
                 <th className="pb-3 px-4">المادة</th>
                 <th className="pb-3 px-4">النوع</th>
+                <th className="pb-3 px-4">الصعوبة</th>
                 <th className="pb-3 px-4">المصدر</th>
                 <th className="pb-3 px-4 text-left">إجراءات</th>
               </tr>
@@ -409,7 +410,16 @@ export default function AdminDashboard() {
                       {q.type}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-500 truncate max-w-[150px]">{q.source?.title}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      q.difficulty <= 2 ? 'bg-green-50 text-green-700' :
+                      q.difficulty === 3 ? 'bg-yellow-50 text-yellow-700' :
+                      'bg-red-50 text-red-700'
+                    }`}>
+                      {q.difficulty} / 5
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-500 truncate max-w-[150px]" title={q.source?.title}>{q.source?.title}</td>
                   <td className="py-3 px-4 text-left">
                     <button onClick={() => handleDeleteQuestion(q.id)} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
                       <Trash2 size={16} />
