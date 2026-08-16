@@ -34,7 +34,7 @@ model SourceMaterial {
   title     String
   type      MaterialType
   subjectId String
-  subject   Subject      @relation(fields: [subjectId], references: [id])
+  subject   Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questions Question[]
   createdAt DateTime     @default(now())
 }
@@ -55,9 +55,9 @@ model Question {
   rubric          String?
   
   subjectId       String
-  subject         Subject      @relation(fields: [subjectId], references: [id])
+  subject         Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   sourceId        String?
-  source          SourceMaterial? @relation(fields: [sourceId], references: [id])
+  source          SourceMaterial? @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   
   topics          String[]
   
@@ -70,6 +70,7 @@ model ExamTemplate {
   name      String
   rules     Json
   subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 }
 
 model Exam {

@@ -43,3 +43,17 @@ export const createSubject = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'فشل في إنشاء المادة الدراسية' });
   }
 };
+
+export const deleteSubject = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  try {
+    // بفضل onDelete: Cascade، سيتم حذف كل ما يتعلق بالمادة تلقائياً
+    await prisma.subject.delete({
+      where: { id }
+    });
+    res.status(200).json({ message: 'تم حذف المادة بنجاح مع كافة ملفاتها' });
+  } catch (error: any) {
+    console.error('Error deleting subject:', error);
+    res.status(500).json({ error: 'فشل في حذف المادة' });
+  }
+};

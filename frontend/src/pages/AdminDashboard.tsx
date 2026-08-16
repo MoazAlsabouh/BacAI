@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UploadCloud, FileText, AlertCircle, CheckCircle2, Loader2, Plus, LogOut } from 'lucide-react';
+import { UploadCloud, FileText, AlertCircle, CheckCircle2, Loader2, Plus, LogOut, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 
@@ -9,8 +9,8 @@ export default function AdminDashboard() {
   const [subjectId, setSubjectId] = useState('');
   const [type, setType] = useState('PAST_EXAM');
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
-  const [stats, setStats] = useState<any>(null);
 
   const [subjects, setSubjects] = useState<any[]>([]);
   const [isCreatingSubject, setIsCreatingSubject] = useState(false);
@@ -62,36 +62,70 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !subjectId) {
-      setStatus({ type: 'error', message: 'الرجاء اختيار المادة والملف' });
-      return;
+  const handleDeleteSubject = async () => {
+    if (!subjectId) return;
+    if (!confirm('هل أنت متأكد من حذف هذه المادة؟ سيتم حذف جميع الكتب والأسئلة المرتبطة بها نهائياً!')) return;
+    
+    setSubjectLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/subjects/${subjectId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('فشل في حذف المادة');
+      
+      setSubjectId('');
+      await fetchSubjects();
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء الحذف');
+    } finally {
+      setSubjectLoading(false);
     }
+  };
+
+  const handleUpload = async () => {
+    if (!file || !subjectId) return;
 
     setLoading(true);
+    setUploadProgress(0);
     setStatus({ type: null, message: '' });
-    setStats(null);
-
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('subjectId', subjectId);
     formData.append('type', type);
 
     try {
-      const response = await fetch(`${API_URL}/api/admin/upload-material`, {
-        method: 'POST',
-        body: formData,
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_URL}/api/admin/upload-material`);
+        
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percent);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        };
+        
+        xhr.onerror = () => reject(new Error('Network Error'));
+        xhr.send(formData);
       });
 
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.error || 'فشل في رفع الملف');
-
-      setStatus({ type: 'success', message: 'تم استخراج البيانات وتخزينها بنجاح!' });
-      setStats(data);
-    } catch (error: any) {
-      setStatus({ type: 'error', message: error.message });
+      setUploadProgress(null);
+      setStatus({ type: 'success', message: 'تم رفع الملف ومعالجته بنجاح!' });
+      setFile(null);
+    } catch (err: any) {
+      console.error(err);
+      setUploadProgress(null);
+      setStatus({ type: 'error', message: err.message || 'حدث خطأ أثناء الرفع أو المعالجة' });
     } finally {
       setLoading(false);
     }
@@ -121,7 +155,7 @@ export default function AdminDashboard() {
           قم برفع الملفات (كتاب، دورات سابقة، أو قالب وزاري) ليقوم الذكاء الاصطناعي بتحليلها، استخراج الأسئلة وتصنيفها، أو حفظ القالب الامتحاني.
         </p>
 
-        <form onSubmit={handleUpload} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div className="space-y-2">
@@ -155,16 +189,27 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               ) : (
-                <select 
-                  value={subjectId}
-                  onChange={(e) => setSubjectId(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-                >
-                  {subjects.length === 0 && <option value="">لا يوجد مواد، أضف مادة أولاً</option>}
-                  {subjects.map(sub => (
-                    <option key={sub.id} value={sub.id}>{sub.name}</option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select 
+                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                    value={subjectId}
+                    onChange={(e) => setSubjectId(e.target.value)}
+                  >
+                    {subjects.length === 0 && <option value="">لا يوجد مواد</option>}
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleDeleteSubject}
+                    disabled={!subjectId || subjectLoading}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="حذف المادة"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -205,11 +250,19 @@ export default function AdminDashboard() {
 
           <button 
             type="submit" 
-            disabled={!file || loading}
+            disabled={!file || !subjectId || loading}
             className="w-full bg-primary text-white py-3 rounded-lg font-medium shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? <Loader2 className="animate-spin" /> : <UploadCloud size={20} />}
-            {loading ? 'جاري التحليل بواسطة الذكاء الاصطناعي...' : 'رفع ومعالجة الملف'}
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" />
+                {uploadProgress !== null && uploadProgress < 100 
+                  ? `جاري الرفع... ${uploadProgress}%` 
+                  : 'جاري المعالجة عبر الذكاء الاصطناعي... (قد يستغرق وقتاً)'}
+              </>
+            ) : (
+              'رفع ومعالجة الملف'
+            )}
           </button>
         </form>
 
@@ -218,14 +271,6 @@ export default function AdminDashboard() {
             {status.type === 'success' ? <CheckCircle2 className="mt-0.5" size={20} /> : <AlertCircle className="mt-0.5" size={20} />}
             <div>
               <p className="font-medium">{status.message}</p>
-              {stats && (
-                <div className="mt-2 text-sm opacity-90">
-                  <p>نوع المعالجة: {type === 'TEMPLATE' ? 'قالب امتحاني' : 'بنك أسئلة'}</p>
-                  <pre className="mt-2 bg-white bg-opacity-50 p-2 rounded text-left" dir="ltr">
-                    {JSON.stringify(stats.parsedDataPreview, null, 2)}
-                  </pre>
-                </div>
-              )}
             </div>
           </div>
         )}

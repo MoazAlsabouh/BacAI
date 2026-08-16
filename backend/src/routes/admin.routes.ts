@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { uploadMaterial } from '../controllers/ingestion.controller';
-import { getSubjects, createSubject } from '../controllers/subject.controller';
+import { getSubjects, createSubject, deleteSubject } from '../controllers/subject.controller';
 
 const router = Router();
 const upload = multer({ 
@@ -13,5 +13,6 @@ const upload = multer({
 router.post('/upload-material', upload.single('file'), uploadMaterial);
 router.get('/subjects', getSubjects);
 router.post('/subjects', createSubject);
+router.delete('/subjects/:id', deleteSubject);
 
 export default router;
