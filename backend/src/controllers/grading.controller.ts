@@ -58,7 +58,7 @@ export const submitAnswer = async (req: Request, res: Response): Promise<void> =
       `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.7-flash',
         contents: [{ role: 'user', parts: [{ text: systemPrompt + "\n\n" + promptText }] }],
         config: { responseMimeType: "application/json" }
       });
