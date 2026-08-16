@@ -19,6 +19,7 @@ model Subject {
   name      String
   materials SourceMaterial[]
   questions Question[]
+  templates ExamTemplate[]
 }
 
 enum MaterialType {
