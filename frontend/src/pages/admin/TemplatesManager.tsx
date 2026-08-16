@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Search, Code, Loader2, Database } from 'lucide-react';
+import { BookOpen, Search, Code, Loader2, Database, Trash2 } from 'lucide-react';
 import { API_URL } from '../../config';
 
 export default function TemplatesManager() {
@@ -23,8 +23,6 @@ export default function TemplatesManager() {
   const fetchTemplates = async () => {
     setLoading(true);
     try {
-      // Since we don't have a direct /api/admin/templates endpoint yet, 
-      // we'll need to create one or assume it exists. Let's assume we'll build it.
       const url = new URL(`${API_URL}/api/admin/templates`);
       if (filterSubject) url.searchParams.append('subjectId', filterSubject);
       const res = await fetch(url.toString());
@@ -36,6 +34,24 @@ export default function TemplatesManager() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (id: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا القالب؟')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/templates/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        if (selectedTemplate?.id === id) setSelectedTemplate(null);
+        fetchTemplates();
+      } else {
+        alert('حدث خطأ أثناء الحذف');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء الحذف');
     }
   };
 
@@ -75,11 +91,24 @@ export default function TemplatesManager() {
               templates.map(t => (
                 <div 
                   key={t.id} 
-                  onClick={() => setSelectedTemplate(t)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedTemplate?.id === t.id ? 'border-primary bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                  className={`p-4 rounded-xl border transition-all flex flex-col gap-2 ${selectedTemplate?.id === t.id ? 'border-primary bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
                 >
-                  <h4 className="font-bold text-gray-800 text-sm">{t.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">المادة: {t.subject?.name}</p>
+                  <div 
+                    className="cursor-pointer flex-1"
+                    onClick={() => setSelectedTemplate(t)}
+                  >
+                    <h4 className="font-bold text-gray-800 text-sm" dir="auto">{t.name.includes('.pdf') ? t.name.replace('.pdf', '') : t.name}</h4>
+                    <p className="text-xs text-gray-500 mt-1">المادة: {t.subject?.name}</p>
+                  </div>
+                  <div className="flex justify-end mt-2">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                      className="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                      title="حذف القالب"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -94,9 +123,17 @@ export default function TemplatesManager() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">{selectedTemplate.name}</h3>
-                  <p className="text-sm text-blue-700">هذا القالب يحدد المعايير الدقيقة التي يقوم النظام بناءً عليها بتوليد امتحانات جديدة عشوائية ولكن مطابقة للمواصفات الوزارية.</p>
+                <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-bold text-blue-900 mb-2" dir="auto">{selectedTemplate.name.includes('.pdf') ? selectedTemplate.name.replace('.pdf', '') : selectedTemplate.name}</h3>
+                    <p className="text-sm text-blue-700">هذا القالب يحدد المعايير الدقيقة التي يقوم النظام بناءً عليها بتوليد امتحانات جديدة عشوائية ولكن مطابقة للمواصفات الوزارية.</p>
+                  </div>
+                  <button 
+                    onClick={() => handleDeleteTemplate(selectedTemplate.id)}
+                    className="bg-red-50 text-red-600 hover:bg-red-100 p-3 rounded-xl transition-colors border border-red-100 flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+                  >
+                    <Trash2 size={16} /> حذف القالب
+                  </button>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">

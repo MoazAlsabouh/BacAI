@@ -7,6 +7,8 @@ export default function QuestionBank() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [filterSubject, setFilterSubject] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [filterDifficulty, setFilterDifficulty] = useState('');
   const [loading, setLoading] = useState(true);
 
   // Fetch subjects once
@@ -22,12 +24,14 @@ export default function QuestionBank() {
     fetchQuestions();
     const interval = setInterval(fetchQuestions, 5000);
     return () => clearInterval(interval);
-  }, [filterSubject]);
+  }, [filterSubject, filterType, filterDifficulty]);
 
   const fetchQuestions = async () => {
     try {
       const url = new URL(`${API_URL}/api/admin/questions`);
       if (filterSubject) url.searchParams.append('subjectId', filterSubject);
+      if (filterType) url.searchParams.append('type', filterType);
+      if (filterDifficulty) url.searchParams.append('difficulty', filterDifficulty);
       const res = await fetch(url.toString());
       const data = await res.json();
       if (res.ok) {
@@ -60,16 +64,42 @@ export default function QuestionBank() {
             بنك الأسئلة الشامل
           </h2>
           
-          <select 
-            value={filterSubject}
-            onChange={(e) => setFilterSubject(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary outline-none bg-gray-50 font-medium min-w-[200px]"
-          >
-            <option value="">جميع المواد</option>
-            {subjects.map((s: any) => (
-              <option key={s.id} value={s.id}>{s.name} ({s.branch === 'SCIENTIFIC' ? 'علمي' : 'أدبي'})</option>
-            ))}
-          </select>
+          <div className="flex flex-wrap gap-2">
+            <select 
+              value={filterSubject}
+              onChange={(e) => setFilterSubject(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary outline-none bg-gray-50 font-medium min-w-[150px]"
+            >
+              <option value="">جميع المواد</option>
+              {subjects.map((s: any) => (
+                <option key={s.id} value={s.id}>{s.name} ({s.branch === 'SCIENTIFIC' ? 'علمي' : 'أدبي'})</option>
+              ))}
+            </select>
+
+            <select 
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary outline-none bg-gray-50 font-medium min-w-[120px]"
+            >
+              <option value="">كل الأنماط</option>
+              <option value="MCQ">أتمتة (MCQ)</option>
+              <option value="MATH">مسائل (MATH)</option>
+              <option value="ESSAY">مقالي (ESSAY)</option>
+            </select>
+
+            <select 
+              value={filterDifficulty}
+              onChange={(e) => setFilterDifficulty(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary outline-none bg-gray-50 font-medium min-w-[120px]"
+            >
+              <option value="">كل المستويات</option>
+              <option value="1">مستوى 1</option>
+              <option value="2">مستوى 2</option>
+              <option value="3">مستوى 3</option>
+              <option value="4">مستوى 4</option>
+              <option value="5">مستوى 5</option>
+            </select>
+          </div>
         </div>
 
         {loading ? (

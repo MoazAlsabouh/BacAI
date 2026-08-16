@@ -67,9 +67,12 @@ export const getSubjectStats = async (req: Request, res: Response): Promise<void
 
 export const getQuestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { subjectId } = req.query;
+    const { subjectId, type, difficulty } = req.query;
     
-    const whereClause = subjectId ? { subjectId: String(subjectId) } : {};
+    const whereClause: any = {};
+    if (subjectId) whereClause.subjectId = String(subjectId);
+    if (type) whereClause.type = String(type);
+    if (difficulty) whereClause.difficulty = parseInt(String(difficulty));
     
     const questions = await prisma.question.findMany({
       where: whereClause,
@@ -117,5 +120,18 @@ export const deleteQuestion = async (req: Request, res: Response): Promise<void>
   } catch (error) {
     console.error('Error deleting question:', error);
     res.status(500).json({ error: 'فشل في حذف السؤال' });
+  }
+};
+
+export const deleteTemplate = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  try {
+    await prisma.examTemplate.delete({
+      where: { id }
+    });
+    res.status(200).json({ message: 'تم حذف القالب بنجاح' });
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    res.status(500).json({ error: 'فشل في حذف القالب' });
   }
 };

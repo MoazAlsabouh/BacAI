@@ -261,11 +261,16 @@ export default function UploadMaterial() {
           )}
 
           {uploadProgress !== null && (
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
-              <div className="bg-primary h-3 rounded-full transition-all duration-300 relative" style={{ width: `${uploadProgress}%` }}>
-                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                  <div className="bg-primary h-3 rounded-full transition-all duration-300 relative" style={{ width: `${uploadProgress}%` }}>
+                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-primary min-w-[3rem] text-left" dir="ltr">{uploadProgress}%</span>
               </div>
-              <p className="text-xs text-center mt-2 text-gray-600 font-medium">{uploadProgress}% - يرجى الانتظار، قد تستغرق المعالجة بواسطة الذكاء الاصطناعي عدة دقائق...</p>
+              <p className="text-xs text-center text-gray-600 font-medium">يرجى الانتظار، قد تستغرق المعالجة بواسطة الذكاء الاصطناعي عدة دقائق...</p>
             </div>
           )}
 
