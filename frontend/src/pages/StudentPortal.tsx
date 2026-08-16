@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { FileDown, PlayCircle, Loader2 } from 'lucide-react';
 import { API_URL } from '../config';
 
+// Suppress KaTeX warnings about Arabic characters
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && (args[0].includes('LaTeX-incompatible') || args[0].includes('No character metrics'))) {
+    return;
+  }
+  originalWarn(...args);
+};
+
 export default function StudentPortal() {
   const [subjectId, setSubjectId] = useState('');
   const [branch, setBranch] = useState('SCIENTIFIC');

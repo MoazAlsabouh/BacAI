@@ -3,6 +3,15 @@ import { Database, Trash2, Loader2 } from 'lucide-react';
 import Latex from 'react-latex-next';
 import { API_URL } from '../../config';
 
+// Suppress KaTeX warnings about Arabic characters
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && (args[0].includes('LaTeX-incompatible') || args[0].includes('No character metrics'))) {
+    return;
+  }
+  originalWarn(...args);
+};
+
 export default function QuestionBank() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);

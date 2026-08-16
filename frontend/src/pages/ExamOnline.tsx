@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Send, CheckCircle, Bot, Award, ArrowRight, Loader2 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { API_URL } from '../config';
+
+// Suppress KaTeX warnings about Arabic characters
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && (args[0].includes('LaTeX-incompatible') || args[0].includes('No character metrics'))) {
+    return;
+  }
+  originalWarn(...args);
+};
 
 export default function ExamOnline() {
   const { attemptId } = useParams();
