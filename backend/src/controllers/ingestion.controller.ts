@@ -61,7 +61,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       أنت خبير تعليمي في المناهج السورية (البكالوريا).
       المهمة: استخراج وتوليد أسئلة امتحانية من الملف المرفق.
       **هام جداً:** 
-      1- استخرج كافة الأسئلة الممكنة التي تغطي جميع أفكار وصفحات الملف بالكامل دون استثناء (استخرج 100 سؤال على الأقل أو أكثر إن كان الملف يسمح بذلك). لا تكتفي بتقديم عينة صغيرة أبداً.
+      1- استخرج حوالي 25 إلى 35 سؤالاً لضمان الجودة وعدم انقطاع النص. يجب أن تغطي الأسئلة أهم الأفكار.
       2- **يجب** وضع كافة المتغيرات والمعادلات والرموز الرياضية بين علامتي $، ولكن **يجب** أن تكون علامة الدولار $ دائماً **داخل علامات التنصيص (Quotes)** الخاصة بالـ JSON (مثال صحيح: "correctAnswer": "$f(x) = x^2$").
       3- **هام لـ LaTeX:** عند كتابة أوامر LaTeX داخل الـ JSON، **يجب** مضاعفة الشرطة المائلة (Double Backslash) لكي لا ينهار الملف (مثال: اكتب "\\\\frac" بدلاً من "\\frac"، واكتب "\\\\infty" بدلاً من "\\infty").
       - صنف كل سؤال إلى: MCQ (أتمتة)، ESSAY (مقالي)، MATH (مسألة).
@@ -126,7 +126,13 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       console.warn("jsonrepair failed, proceeding with original text:", repairErr);
     }
 
-    const parsedData = JSON.parse(generatedText);
+    let parsedData;
+    try {
+      parsedData = JSON.parse(generatedText);
+    } catch (parseError: any) {
+      console.error("JSON parsing failed. Truncated output? Length:", generatedText.length);
+      throw new Error(`تعذر معالجة المخرجات لأن النص المولد غير مكتمل أو منسق بشكل خاطئ (حجم الاستجابة تجاوز الحد المسموح). يرجى تقليل حجم الملف وتجربة ملف أصغر.`);
+    }
 
     if (type === 'TEMPLATE') {
       await prisma.examTemplate.create({
