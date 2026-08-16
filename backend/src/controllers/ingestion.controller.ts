@@ -74,21 +74,39 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       `;
     }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash-lite',
-      contents: [{ 
-        role: 'user', 
-        parts: [
-          { text: systemPrompt },
-          { fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType } }
-        ] 
-      }],
-      config: { responseMimeType: "application/json" }
-    });
+    // Helper to call Gemini with retry on 503 / 429
+    let response: any = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        response = await ai.models.generateContent({
+          model: 'gemini-3.5-flash-lite',
+          contents: [{ 
+            role: 'user', 
+            parts: [
+              { text: systemPrompt },
+              { fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType } }
+            ] 
+          }],
+          config: { responseMimeType: "application/json" }
+        });
+        break; // Success, exit loop
+      } catch (geminiErr: any) {
+        console.warn(`Gemini attempt ${attempts} failed:`, geminiErr.message || geminiErr);
+        if (attempts >= maxAttempts) {
+          throw geminiErr;
+        }
+        // Wait 2.5 seconds before retrying
+        await new Promise(resolve => setTimeout(resolve, 2500 * attempts));
+      }
+    }
 
     // Clean up file from Gemini after processing
     if (uploadResult.name) {
-      await ai.files.delete({ name: uploadResult.name });
+      await ai.files.delete({ name: uploadResult.name }).catch(() => {});
     }
 
     let generatedText = response.text;
@@ -154,9 +172,12 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       parsedDataPreview: type === 'TEMPLATE' ? parsedData : parsedData.slice(0, 2)
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing material:', error);
-    res.status(500).json({ error: 'Failed to process material via AI' });
+    const msg = error?.status === 503 || error?.message?.includes('high demand')
+      ? 'خوادم الذكاء الاصطناعي تشهد ضغطاً مؤقتاً، يرجى المحاولة بعد لحظات.'
+      : (error?.message || 'Failed to process material via AI');
+    res.status(500).json({ error: msg });
   } finally {
     if (req.file && fs.existsSync(req.file.path)) {
       try {
