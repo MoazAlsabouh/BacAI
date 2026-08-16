@@ -40,6 +40,6 @@ export const loginAdmin = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'حدث خطأ داخلي في الخادم' });
+    res.status(500).json({ error: `حدث خطأ داخلي في الخادم: ${error?.message || error}` });
   }
 };
