@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Send, CheckCircle, Bot, Award, ArrowRight, Loader2 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
 import { API_URL } from '../config';
 
 export default function ExamOnline() {
@@ -111,7 +113,9 @@ export default function ExamOnline() {
                     {idx + 1}
                   </div>
                   <div className="flex-1 space-y-4">
-                    <h4 className="text-lg font-medium text-gray-800">{q.content}</h4>
+                    <h4 className="text-lg font-medium text-gray-800" dir="ltr" style={{ textAlign: 'right' }}>
+                      <Latex>{q.content}</Latex>
+                    </h4>
                     
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                       <span className="text-sm font-bold text-gray-500 mb-1 block">إجابتك:</span>
@@ -119,9 +123,9 @@ export default function ExamOnline() {
                     </div>
 
                     {q.type === 'MCQ' ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">
-                        <CheckCircle size={20} />
-                        <span>الإجابة الصحيحة هي: {q.correctAnswer || 'غير متوفرة'}</span>
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200" dir="ltr" style={{ textAlign: 'right' }}>
+                        <CheckCircle size={20} className="shrink-0" />
+                        <span>الإجابة الصحيحة هي: <Latex>{q.correctAnswer || 'غير متوفرة'}</Latex></span>
                       </div>
                     ) : (
                       <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
@@ -164,8 +168,8 @@ export default function ExamOnline() {
           <span className="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded-md text-xs font-bold mb-4">
             {activeQuestionData.type === 'MCQ' ? 'سؤال أتمتة' : 'سؤال مقالي'}
           </span>
-          <h3 className="text-xl text-gray-800 font-medium leading-relaxed">
-            {activeQuestionData.content}
+          <h3 className="text-xl text-gray-800 font-medium leading-relaxed" dir="ltr" style={{ textAlign: 'right' }}>
+            <Latex>{activeQuestionData.content}</Latex>
           </h3>
         </div>
 
@@ -183,9 +187,11 @@ export default function ExamOnline() {
                   value={opt}
                   checked={answers[activeQuestionData.id] === opt}
                   onChange={(e) => handleAnswerChange(e.target.value)}
-                  className="w-5 h-5 text-primary focus:ring-primary"
+                  className="w-5 h-5 text-primary focus:ring-primary shrink-0"
                 />
-                <span className="text-gray-700">{opt}</span>
+                <span className="text-gray-700" dir="ltr" style={{ textAlign: 'right' }}>
+                  <Latex>{opt}</Latex>
+                </span>
               </label>
             )) : <p className="text-gray-500 italic">لا توجد خيارات متاحة لهذا السؤال</p>}
           </div>

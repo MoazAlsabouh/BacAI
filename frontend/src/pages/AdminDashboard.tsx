@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { UploadCloud, FileText, AlertCircle, CheckCircle2, Loader2, Plus, LogOut, Trash2, BarChart3, Database, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
 import { API_URL } from '../config';
 
 export default function AdminDashboard() {
@@ -403,7 +405,9 @@ export default function AdminDashboard() {
             <tbody>
               {questions.map((q) => (
                 <tr key={q.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 max-w-xs truncate" title={q.content}>{q.content}</td>
+                  <td className="py-3 px-4 max-w-xs truncate" title={q.content} dir="ltr" style={{ textAlign: 'right' }}>
+                    <Latex>{q.content}</Latex>
+                  </td>
                   <td className="py-3 px-4">{q.subject?.name}</td>
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">

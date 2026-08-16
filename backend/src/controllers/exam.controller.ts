@@ -109,23 +109,49 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
   try {
     const { subjectId, templateId } = req.body;
     
-    // Simulate generating a real exam (similar logic to booklet but saves to DB)
-    // For now, we'll fetch random questions based on subject to demonstrate the flow
-    const questions = await prisma.question.findMany({
-      where: { subjectId: subjectId as string },
-      take: 5 // Get 5 random questions
+    // 1. Fetch Template
+    const template = await prisma.examTemplate.findUnique({
+      where: { id: templateId as string }
     });
 
-    if (questions.length === 0) {
-      res.status(400).json({ error: 'لا يوجد أسئلة كافية لهذه المادة في بنك الأسئلة' });
+    if (!template) {
+      res.status(404).json({ error: 'القالب الامتحاني غير موجود' });
       return;
+    }
+
+    // 2. Fetch all questions for this subject
+    const allQuestions = await prisma.question.findMany({
+      where: { subjectId: subjectId as string }
+    });
+
+    if (allQuestions.length === 0) {
+      res.status(400).json({ error: 'لا يوجد أسئلة في بنك الأسئلة لهذه المادة' });
+      return;
+    }
+
+    // 3. Generate exam based on template rules
+    const rules: any = template.rules; 
+    const sections = rules.sections || [];
+    let selectedQuestions: any[] = [];
+
+    for (const section of sections) {
+      // Filter questions by type
+      const eligibleQuestions = allQuestions.filter(q => q.type === section.type);
+
+      if (eligibleQuestions.length < section.count) {
+        throw new Error(`لا يوجد أسئلة كافية من نوع ${section.type}. مطلوب ${section.count} ومتاح ${eligibleQuestions.length}.`);
+      }
+
+      // Pick random questions matching count
+      const chosen = getRandomItems(eligibleQuestions, section.count);
+      selectedQuestions = [...selectedQuestions, ...chosen];
     }
 
     const exam = await prisma.exam.create({
       data: {
-        title: 'امتحان تجريبي ديناميكي',
+        title: `امتحان تجريبي: ${template.name}`,
         questions: {
-          create: questions.map((q, idx) => ({
+          create: selectedQuestions.map((q, idx) => ({
             questionId: q.id,
             order: idx
           }))
