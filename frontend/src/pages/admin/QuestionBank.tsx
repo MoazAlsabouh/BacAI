@@ -9,6 +9,9 @@ export default function QuestionBank() {
   const [filterSubject, setFilterSubject] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Fetch subjects once
@@ -24,7 +27,7 @@ export default function QuestionBank() {
     fetchQuestions();
     const interval = setInterval(fetchQuestions, 5000);
     return () => clearInterval(interval);
-  }, [filterSubject, filterType, filterDifficulty]);
+  }, [filterSubject, filterType, filterDifficulty, page]);
 
   const fetchQuestions = async () => {
     try {
@@ -32,10 +35,15 @@ export default function QuestionBank() {
       if (filterSubject) url.searchParams.append('subjectId', filterSubject);
       if (filterType) url.searchParams.append('type', filterType);
       if (filterDifficulty) url.searchParams.append('difficulty', filterDifficulty);
+      url.searchParams.append('page', String(page));
+      url.searchParams.append('limit', '50');
+      
       const res = await fetch(url.toString());
       const data = await res.json();
       if (res.ok) {
-        setQuestions(data);
+        setQuestions(data.data || []);
+        setTotalPages(data.totalPages || 1);
+        setTotalQuestions(data.total || 0);
         setLoading(false);
       }
     } catch (err) {
@@ -164,6 +172,29 @@ export default function QuestionBank() {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-gray-100">
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              السابق
+            </button>
+            <span className="text-sm font-medium text-gray-600">
+              صفحة {page} من {totalPages} (إجمالي {totalQuestions} سؤال)
+            </span>
+            <button 
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              التالي
+            </button>
           </div>
         )}
       </div>

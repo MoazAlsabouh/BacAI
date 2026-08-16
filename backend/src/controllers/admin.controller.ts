@@ -67,23 +67,37 @@ export const getSubjectStats = async (req: Request, res: Response): Promise<void
 
 export const getQuestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { subjectId, type, difficulty } = req.query;
+    const { subjectId, type, difficulty, page = '1', limit = '50' } = req.query;
     
+    const pageNum = parseInt(String(page), 10);
+    const limitNum = parseInt(String(limit), 10);
+    const skip = (pageNum - 1) * limitNum;
+
     const whereClause: any = {};
     if (subjectId) whereClause.subjectId = String(subjectId);
     if (type) whereClause.type = String(type);
     if (difficulty) whereClause.difficulty = parseInt(String(difficulty));
     
-    const questions = await prisma.question.findMany({
-      where: whereClause,
-      include: {
-        subject: { select: { name: true } },
-        source: { select: { title: true } }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const [questions, total] = await Promise.all([
+      prisma.question.findMany({
+        where: whereClause,
+        include: {
+          subject: { select: { name: true } },
+          source: { select: { title: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limitNum
+      }),
+      prisma.question.count({ where: whereClause })
+    ]);
     
-    res.status(200).json(questions);
+    res.status(200).json({
+      data: questions,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum)
+    });
   } catch (error) {
     console.error('Error fetching questions:', error);
     res.status(500).json({ error: 'Failed to fetch questions' });
