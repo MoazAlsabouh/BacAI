@@ -67,7 +67,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     }
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.7-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: [{ 
         role: 'user', 
         parts: [
