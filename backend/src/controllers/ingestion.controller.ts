@@ -21,17 +21,13 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // ملاحظة هامة: بالنسبة للكتب الضخمة (مثل 200 ميغابايت)، لا نقوم بتخزين الملف في قاعدة بياناتنا أبداً!
-    // بدلاً من ذلك، نستخدم واجهة (Gemini File API) لرفع الملف مؤقتاً إلى خوادم جوجل، تحليله، ثم نأخذ الأسئلة فقط.
-    // بمجرد انتهاء التحليل، يتم حذف الملف من خادمنا المحلي تماماً (عبر fs.unlinkSync لاحقاً).
-    
-    // (هنا نفترض قراءة الملف النصي للتبسيط، لكن للملفات الضخمة يجب استخدام:
-    // const uploadResult = await ai.files.uploadFile(file.path, { mimeType: 'application/pdf' });
-    // ثم تمرير uploadResult.uri للبرومبت بدلاً من النص الكامل)
-    
-    const fileContent = fs.readFileSync(file.path, 'utf8');
+    // Upload file directly to Gemini to save RAM
+    const uploadResult = await ai.files.upload({
+      file: file.path,
+      mimeType: file.mimetype || 'text/plain',
+    });
 
-    // Create the SourceMaterial record first (نحفظ اسم الكتاب ونوعه فقط، وليس الملف نفسه!)
+    // Create the SourceMaterial record first
     const sourceMaterial = await prisma.sourceMaterial.create({
       data: {
         title: file.originalname,
@@ -57,7 +53,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
     } else {
       systemPrompt = `
       أنت خبير تعليمي في المناهج السورية (البكالوريا).
-      المهمة: استخراج وتوليد أسئلة امتحانية من النص.
+      المهمة: استخراج وتوليد أسئلة امتحانية من الملف المرفق.
       - صنف كل سؤال إلى: MCQ (أتمتة)، ESSAY (مقالي)، MATH (مسألة).
       - حدد الصعوبة من 1 إلى 5.
       - استنتج مواضيع السؤال وضعها في مصفوفة topics (مثل ["نواس مرن", "طاقة"]).
@@ -70,9 +66,18 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-pro',
-      contents: [{ role: 'user', parts: [{ text: systemPrompt + "\n\nالنص:\n" + fileContent }] }],
+      contents: [{ 
+        role: 'user', 
+        parts: [
+          { text: systemPrompt },
+          { fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType } }
+        ] 
+      }],
       config: { responseMimeType: "application/json" }
     });
+
+    // Clean up file from Gemini after processing
+    await ai.files.delete({ name: uploadResult.name });
 
     const generatedText = response.text;
     if (!generatedText) throw new Error("No text generated from AI");
@@ -106,8 +111,6 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       });
     }
 
-    fs.unlinkSync(file.path);
-
     res.status(200).json({ 
       message: 'Processing complete', 
       sourceId: sourceMaterial.id,
@@ -117,5 +120,13 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
   } catch (error) {
     console.error('Error processing material:', error);
     res.status(500).json({ error: 'Failed to process material via AI' });
+  } finally {
+    if (req.file && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (err) {
+        console.error('Failed to delete temporary file:', err);
+      }
+    }
   }
 };
