@@ -90,9 +90,16 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
       await ai.files.delete({ name: uploadResult.name });
     }
 
-    const generatedText = response.text;
+    let generatedText = response.text;
     if (!generatedText) throw new Error("No text generated from AI");
     
+    // 1. Remove markdown formatting if present
+    generatedText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    // 2. Fix unescaped single backslashes used in LaTeX (e.g. \infty -> \\infty) 
+    // This safely doubles single backslashes that are not escaping a quote or another backslash
+    generatedText = generatedText.replace(/(?<!\\)\\(?![\\"])/g, '\\\\');
+
     const parsedData = JSON.parse(generatedText);
 
     if (type === 'TEMPLATE') {
