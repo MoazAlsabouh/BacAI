@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, FileDown, PlayCircle, Loader2 } from 'lucide-react';
+import { FileDown, PlayCircle, Loader2 } from 'lucide-react';
 import { API_URL } from '../config';
 
 export default function StudentPortal() {

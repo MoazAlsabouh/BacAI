@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, CheckCircle, AlertCircle, Bot, Award, ArrowRight, Loader2 } from 'lucide-react';
+import { Send, CheckCircle, Bot, Award, ArrowRight, Loader2 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { API_URL } from '../config';
 

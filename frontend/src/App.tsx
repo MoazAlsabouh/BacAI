@@ -1,5 +1,5 @@
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { GraduationCap, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import StudentPortal from './pages/StudentPortal';
 import AdminDashboard from './pages/AdminDashboard';
 import ExamOnline from './pages/ExamOnline';
