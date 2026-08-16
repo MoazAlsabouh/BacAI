@@ -73,21 +73,25 @@ export const generatePdfBooklet = async (req: Request, res: Response): Promise<v
         sections: []
       };
 
+      const usedQuestionIds = new Set<string>();
+
       for (const section of sections) {
         // Filter questions by type and close to target difficulty
-        const eligibleQuestions = allQuestions.filter(q => 
+        let eligibleQuestions = allQuestions.filter(q => 
           q.type === section.type && 
-          Math.abs(q.difficulty - targetDifficulty) <= 1
+          Math.abs(q.difficulty - targetDifficulty) <= 1 &&
+          !usedQuestionIds.has(q.id)
         );
 
         // Fallback if not enough questions match the exact difficulty
-        const poolToUse = eligibleQuestions.length >= section.count ? eligibleQuestions : allQuestions.filter(q => q.type === section.type);
+        let poolToUse = eligibleQuestions.length >= section.count ? eligibleQuestions : allQuestions.filter(q => q.type === section.type && !usedQuestionIds.has(q.id));
 
         if (poolToUse.length < section.count) {
           throw new Error(`Not enough ${section.type} questions in the bank. Need ${section.count}, found ${poolToUse.length}.`);
         }
 
         const selectedQuestions = getRandomItems(poolToUse, section.count);
+        selectedQuestions.forEach(q => usedQuestionIds.add(q.id));
         
         examInstance.sections.push({
           title: section.title,
@@ -147,17 +151,19 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
     const rules: any = template.rules; 
     const sections = rules.sections || [];
     let selectedQuestions: any[] = [];
+    const usedQuestionIds = new Set<string>();
 
     for (const section of sections) {
-      // Filter questions by type
-      const eligibleQuestions = allQuestions.filter(q => q.type === section.type);
+      // Filter questions by type and exclude already used
+      const eligibleQuestions = allQuestions.filter(q => q.type === section.type && !usedQuestionIds.has(q.id));
 
       if (eligibleQuestions.length < section.count) {
-        throw new Error(`لا يوجد أسئلة كافية من نوع ${section.type}. مطلوب ${section.count} ومتاح ${eligibleQuestions.length}.`);
+        throw new Error(`لا يوجد أسئلة كافية من نوع ${section.type}. مطلوب ${section.count} ومتاح ${eligibleQuestions.length} (بعد استبعاد المكرر).`);
       }
 
       // Pick random questions matching count
       const chosen = getRandomItems(eligibleQuestions, section.count);
+      chosen.forEach(q => usedQuestionIds.add(q.id));
       selectedQuestions = [...selectedQuestions, ...chosen];
     }
 
