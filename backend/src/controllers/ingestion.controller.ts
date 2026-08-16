@@ -104,7 +104,7 @@ export const uploadMaterial = async (req: Request, res: Response): Promise<void>
         content: q.content,
         options: q.options || [],
         correctAnswer: q.correctAnswer || null,
-        rubric: q.rubric || null,
+        rubric: Array.isArray(q.rubric) ? q.rubric.join('\n') : (q.rubric || null),
         topics: q.topics || [],
         subjectId: subjectId,
         sourceId: sourceMaterial.id
