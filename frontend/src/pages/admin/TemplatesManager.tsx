@@ -3,6 +3,25 @@ import { BookOpen, Search, Code, Loader2, Database, Trash2 } from 'lucide-react'
 import { API_URL } from '../../config';
 
 export default function TemplatesManager() {
+  // Helper to fix mojibake (utf-8 read as latin-1)
+  const fixEncoding = (text: string) => {
+    if (!text) return '';
+    try {
+      // If it looks like Mojibake, try decoding it
+      if (text.includes('Ø') || text.includes('Ù')) {
+        return decodeURIComponent(escape(text));
+      }
+      return text;
+    } catch (e) {
+      return text;
+    }
+  };
+
+  const formatName = (name: string) => {
+    let clean = fixEncoding(name);
+    return clean.includes('.pdf') ? clean.replace('.pdf', '') : clean;
+  };
+
   const [subjects, setSubjects] = useState<any[]>([]);
   const [filterSubject, setFilterSubject] = useState('');
   const [templates, setTemplates] = useState<any[]>([]);
@@ -97,7 +116,7 @@ export default function TemplatesManager() {
                     className="cursor-pointer flex-1"
                     onClick={() => setSelectedTemplate(t)}
                   >
-                    <h4 className="font-bold text-gray-800 text-sm" dir="auto">{t.name.includes('.pdf') ? t.name.replace('.pdf', '') : t.name}</h4>
+                    <h4 className="font-bold text-gray-800 text-sm" dir="auto">{formatName(t.name)}</h4>
                     <p className="text-xs text-gray-500 mt-1">المادة: {t.subject?.name}</p>
                   </div>
                   <div className="flex justify-end mt-2">
@@ -125,7 +144,7 @@ export default function TemplatesManager() {
               <div className="space-y-6">
                 <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 flex justify-between items-start">
                   <div>
-                    <h3 className="text-xl font-bold text-blue-900 mb-2" dir="auto">{selectedTemplate.name.includes('.pdf') ? selectedTemplate.name.replace('.pdf', '') : selectedTemplate.name}</h3>
+                    <h3 className="text-xl font-bold text-blue-900 mb-2" dir="auto">{formatName(selectedTemplate.name)}</h3>
                     <p className="text-sm text-blue-700">هذا القالب يحدد المعايير الدقيقة التي يقوم النظام بناءً عليها بتوليد امتحانات جديدة عشوائية ولكن مطابقة للمواصفات الوزارية.</p>
                   </div>
                   <button 
