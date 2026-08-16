@@ -1,11 +1,18 @@
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { User, ShieldCheck } from 'lucide-react';
 import StudentPortal from './pages/StudentPortal';
-import AdminDashboard from './pages/AdminDashboard';
-import ExamOnline from './pages/ExamOnline';
+import AdminLayout from './layouts/AdminLayout';
 import AdminLogin from './pages/AdminLogin';
+import Statistics from './pages/admin/Statistics';
+import UploadMaterial from './pages/admin/UploadMaterial';
+import QuestionBank from './pages/admin/QuestionBank';
+import TemplatesManager from './pages/admin/TemplatesManager';
+
+import ExamOnline from './pages/ExamOnline';
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const isAdminLoggedIn = !!localStorage.getItem('adminToken');
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex flex-col">
       {/* Top Navbar */}
@@ -18,7 +25,12 @@ function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              {/* تمت إزالة زر المشرف من هنا بناءً على طلبك ليكون النظام مخصصاً للطالب كواجهة رئيسية */}
+              {isAdminLoggedIn && (
+                <Link to="/admin" className="text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-sm">
+                  <ShieldCheck size={18} className="text-primary" />
+                  لوحة التحكم
+                </Link>
+              )}
               <Link to="/" className="text-sm font-medium text-white bg-primary px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm">
                 <User size={18} />
                 بوابة الطالب
@@ -43,8 +55,13 @@ function App() {
         <Routes>
           <Route path="/" element={<StudentPortal />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/exam/:attemptId" element={<ExamOnline />} />
+          
+          <Route path="/admin" element={<AdminLayout><Statistics /></AdminLayout>} />
+          <Route path="/admin/stats" element={<AdminLayout><Statistics /></AdminLayout>} />
+          <Route path="/admin/upload" element={<AdminLayout><UploadMaterial /></AdminLayout>} />
+          <Route path="/admin/questions" element={<AdminLayout><QuestionBank /></AdminLayout>} />
+          <Route path="/admin/templates" element={<AdminLayout><TemplatesManager /></AdminLayout>} />
         </Routes>
       </Layout>
     </Router>

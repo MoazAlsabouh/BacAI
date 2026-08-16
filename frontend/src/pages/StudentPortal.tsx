@@ -4,10 +4,12 @@ import { API_URL } from '../config';
 
 export default function StudentPortal() {
   const [subjectId, setSubjectId] = useState('');
+  const [branch, setBranch] = useState('SCIENTIFIC');
   const [examCount, setExamCount] = useState(1);
   const [loading, setLoading] = useState(false);
   const [pdfReady, setPdfReady] = useState(false);
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<any[]>([]);
 
   useEffect(() => {
     fetchSubjects();
@@ -19,11 +21,20 @@ export default function StudentPortal() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch subjects');
       setSubjects(data);
-      if (data.length > 0) setSubjectId(data[0].id);
     } catch (err) {
       console.error('Error fetching subjects:', err);
     }
   };
+
+  useEffect(() => {
+    const filtered = subjects.filter(s => s.branch === branch);
+    setFilteredSubjects(filtered);
+    if (filtered.length > 0) {
+      setSubjectId(filtered[0].id);
+    } else {
+      setSubjectId('');
+    }
+  }, [subjects, branch]);
 
   const handleGeneratePdf = async () => {
     if (!subjectId) return;
@@ -76,18 +87,31 @@ export default function StudentPortal() {
           </p>
           
           <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">المادة</label>
-              <select 
-                value={subjectId}
-                onChange={(e) => setSubjectId(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
-              >
-                {subjects.length === 0 && <option value="">لا يوجد مواد، اطلب من المشرف إضافتها</option>}
-                {subjects.map(sub => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
-                ))}
-              </select>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">الفرع</label>
+                <select 
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                >
+                  <option value="SCIENTIFIC">الفرع العلمي</option>
+                  <option value="LITERARY">الفرع الأدبي</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">المادة</label>
+                <select 
+                  value={subjectId}
+                  onChange={(e) => setSubjectId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                >
+                  {filteredSubjects.length === 0 && <option value="">لا يوجد مواد في هذا الفرع</option>}
+                  {filteredSubjects.map(sub => (
+                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">عدد النماذج المطلوبة</label>
@@ -126,14 +150,31 @@ export default function StudentPortal() {
           </p>
           
           <div className="space-y-4 mb-6">
-             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">اختر المادة للبدء</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none">
-                {subjects.length === 0 && <option value="">لا يوجد مواد، اطلب من المشرف إضافتها</option>}
-                {subjects.map(sub => (
-                  <option key={sub.id} value={sub.id}>{sub.name}</option>
-                ))}
-              </select>
+             <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">الفرع</label>
+                <select 
+                  value={branch}
+                  onChange={(e) => setBranch(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                >
+                  <option value="SCIENTIFIC">الفرع العلمي</option>
+                  <option value="LITERARY">الفرع الأدبي</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">المادة</label>
+                <select 
+                  value={subjectId}
+                  onChange={(e) => setSubjectId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                >
+                  {filteredSubjects.length === 0 && <option value="">لا يوجد مواد في هذا الفرع</option>}
+                  {filteredSubjects.map(sub => (
+                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 

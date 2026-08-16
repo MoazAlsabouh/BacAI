@@ -17,11 +17,14 @@ export const getSubjects = async (req: Request, res: Response): Promise<void> =>
 
 export const createSubject = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name } = req.body;
+    const { name, branch } = req.body;
     if (!name || name.trim() === '') {
       res.status(400).json({ error: 'اسم المادة مطلوب' });
       return;
     }
+    
+    const validBranches = ['SCIENTIFIC', 'LITERARY'];
+    const finalBranch = validBranches.includes(branch) ? branch : 'SCIENTIFIC';
 
     // Check if subject already exists
     const existing = await prisma.subject.findFirst({
@@ -34,7 +37,10 @@ export const createSubject = async (req: Request, res: Response): Promise<void> 
     }
 
     const newSubject = await prisma.subject.create({
-      data: { name: name.trim() }
+      data: { 
+        name: name.trim(),
+        branch: finalBranch
+      }
     });
 
     res.status(201).json(newSubject);

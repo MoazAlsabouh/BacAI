@@ -34,6 +34,37 @@ export const getStats = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const getSubjectStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { subjectId } = req.params;
+    
+    // Get all questions for this subject
+    const questions = await prisma.question.findMany({
+      where: { subjectId },
+      select: { type: true, difficulty: true }
+    });
+
+    const questionsByType = questions.reduce((acc: any, q) => {
+      acc[q.type] = (acc[q.type] || 0) + 1;
+      return acc;
+    }, {});
+
+    const questionsByDifficulty = questions.reduce((acc: any, q) => {
+      acc[q.difficulty] = (acc[q.difficulty] || 0) + 1;
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      totalQuestions: questions.length,
+      questionsByType,
+      questionsByDifficulty
+    });
+  } catch (error) {
+    console.error('Error fetching subject stats:', error);
+    res.status(500).json({ error: 'Failed to fetch subject statistics' });
+  }
+};
+
 export const getQuestions = async (req: Request, res: Response): Promise<void> => {
   try {
     const { subjectId } = req.query;
@@ -53,6 +84,26 @@ export const getQuestions = async (req: Request, res: Response): Promise<void> =
   } catch (error) {
     console.error('Error fetching questions:', error);
     res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+};
+
+export const getTemplates = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { subjectId } = req.query;
+    
+    const whereClause = subjectId ? { subjectId: String(subjectId) } : {};
+    
+    const templates = await prisma.examTemplate.findMany({
+      where: whereClause,
+      include: {
+        subject: { select: { name: true } }
+      }
+    });
+    
+    res.status(200).json(templates);
+  } catch (error) {
+    console.error('Error fetching templates:', error);
+    res.status(500).json({ error: 'Failed to fetch templates' });
   }
 };
 

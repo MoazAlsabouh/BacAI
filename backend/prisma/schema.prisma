@@ -14,9 +14,15 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+enum SubjectBranch {
+  SCIENTIFIC
+  LITERARY
+}
+
 model Subject {
-  id        String     @id @default(uuid())
+  id        String         @id @default(uuid())
   name      String
+  branch    SubjectBranch  @default(SCIENTIFIC)
   materials SourceMaterial[]
   questions Question[]
   templates ExamTemplate[]

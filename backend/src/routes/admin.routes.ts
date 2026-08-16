@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { uploadMaterial } from '../controllers/ingestion.controller';
 import { getSubjects, createSubject, deleteSubject } from '../controllers/subject.controller';
-import { getStats, getQuestions, deleteQuestion } from '../controllers/admin.controller';
+import { getStats, getSubjectStats, getQuestions, deleteQuestion, getTemplates } from '../controllers/admin.controller';
 
 const router = Router();
 const upload = multer({ 
@@ -10,10 +10,12 @@ const upload = multer({
   limits: { fileSize: 250 * 1024 * 1024 } // 250 MB limit
 });
 
-// Stats and Questions routes
+// Admin routes
 router.get('/stats', getStats);
+router.get('/stats/subject/:subjectId', getSubjectStats);
 router.get('/questions', getQuestions);
 router.delete('/questions/:id', deleteQuestion);
+router.get('/templates', getTemplates);
 
 // Subject routes
 router.post('/upload-material', upload.single('file'), uploadMaterial);
