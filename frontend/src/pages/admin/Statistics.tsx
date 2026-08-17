@@ -87,7 +87,7 @@ export default function Statistics() {
   const typeChartData = subjectStats ? [
     { name: 'أتمتة (MCQ)', value: subjectStats.questionsByType.MCQ || 0 },
     { name: 'مقالي (ESSAY)', value: subjectStats.questionsByType.ESSAY || 0 },
-    { name: 'مسائل (MATH)', value: subjectStats.questionsByType.MATH || 0 },
+    { name: 'مسائل (PROBLEM_SOLVING)', value: subjectStats.questionsByType.PROBLEM_SOLVING || 0 },
   ] : [];
 
   const difficultyChartData = subjectStats ? Object.keys(subjectStats.questionsByDifficulty).map(key => ({

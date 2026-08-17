@@ -100,7 +100,7 @@ export default function QuestionBank() {
             >
               <option value="">كل الأنماط</option>
               <option value="MCQ">أتمتة (MCQ)</option>
-              <option value="MATH">مسائل (MATH)</option>
+              <option value="PROBLEM_SOLVING">مسائل (PROBLEM_SOLVING)</option>
               <option value="ESSAY">مقالي (ESSAY)</option>
             </select>
 
