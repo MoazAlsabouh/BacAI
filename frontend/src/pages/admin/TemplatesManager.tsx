@@ -174,9 +174,10 @@ export default function TemplatesManager() {
                   </h4>
                   <ul className="space-y-3 text-sm text-gray-700 list-decimal list-inside leading-relaxed bg-gray-50 p-5 rounded-xl">
                     <li>يبدأ النظام بقراءة مصفوفة <code className="bg-white px-1 py-0.5 rounded border text-blue-600">sections</code> من القالب أعلاه.</li>
-                    <li>لكل قسم (Section)، يحدد النظام نوع الأسئلة المطلوبة (مثل <code className="bg-white px-1 py-0.5 rounded border text-red-500">MCQ</code>) والعدد المطلوب (Count).</li>
+                    <li>لكل قسم (Section)، يحدد النظام نوع الأسئلة المطلوبة (مثل <code className="bg-white px-1 py-0.5 rounded border text-red-500">MCQ, ESSAY, PROBLEM_SOLVING</code>) والمواضيع المطلوبة <code className="bg-white px-1 py-0.5 rounded border text-indigo-500">topics</code>.</li>
                     <li>يقوم النظام بالاتصال ببنك الأسئلة للمادة الحالية، ويستخرج كافة الأسئلة المطابقة لهذا النوع.</li>
-                    <li>يستخدم النظام خوارزمية ترتيب عشوائي (Random Shuffle) لاختيار العدد المطلوب من الأسئلة، مع التأكد عبر <code className="bg-white px-1 py-0.5 rounded border text-purple-600">usedQuestionIds</code> من عدم تكرار نفس السؤال في أقسام مختلفة.</li>
+                    <li>تُحسب <strong>"درجة تطابق" (Topic Score)</strong> لكل سؤال بناءً على التقاطع بين مواضيعه ومواضيع القسم المطلوب في القالب.</li>
+                    <li>يستخدم النظام خوارزمية <strong>ترتيب عشوائي ذكية</strong> لاختيار أفضل الأسئلة تطابقاً، مع الحفاظ على عشوائية الاختيار بين الأسئلة المتساوية في التطابق لضمان تنوع الامتحانات.</li>
                     <li>في حال عدم توفر أسئلة كافية في البنك تغطي العدد المطلوب، يتم إرجاع خطأ <code className="bg-white px-1 py-0.5 rounded border text-red-500">400 Bad Request</code> لمنع توليد امتحان ناقص.</li>
                     <li>أخيراً، يتم إنشاء سجل جديد في جدول <code className="bg-white px-1 py-0.5 rounded border text-green-600">Exam</code> وربطه بالأسئلة المختارة بجدول وسيط يحفظ الترتيب (Order).</li>
                   </ul>
