@@ -217,10 +217,13 @@ export const startOnlineExam = async (req: Request, res: Response): Promise<void
       }
     });
 
+    const studentId = (req as any).user?.studentId;
+
     const attempt = await prisma.studentAttempt.create({
       data: {
         examId: exam.id,
-        studentName: 'طالب افتراضي'
+        studentId: studentId || null,
+        studentName: studentId ? null : 'طالب افتراضي'
       }
     });
 
