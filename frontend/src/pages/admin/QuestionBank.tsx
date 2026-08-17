@@ -138,16 +138,25 @@ export default function QuestionBank() {
               questions.map((q: any) => (
                 <div key={q.id} className="border border-gray-200 rounded-xl p-5 hover:border-primary/50 transition-colors bg-gray-50/50">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
-                        {q.type}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-blue-200">
+                        {q.type === 'PROBLEM_SOLVING' ? 'مسألة' : q.type === 'ESSAY' ? 'مقالي' : 'أتمتة'}
                       </span>
-                      <span className="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-gray-200">
                         الصعوبة: {q.difficulty}/5
                       </span>
-                      <span className="text-sm font-medium text-gray-500">
+                      <span className="text-sm font-medium text-gray-500 bg-white px-2 py-1 rounded border border-gray-100">
                         {q.subject.name} - {q.source?.title}
                       </span>
+                      {q.topics && q.topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mr-2 border-r-2 pr-3 border-gray-200">
+                          {q.topics.map((t: string, idx: number) => (
+                            <span key={idx} className="bg-indigo-50 text-indigo-700 text-[11px] font-bold px-2 py-1 rounded-md border border-indigo-100">
+                              #{t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <button 
                       onClick={() => handleDeleteQuestion(q.id)}
