@@ -37,10 +37,12 @@ export default function TemplatesManager() {
 
   useEffect(() => {
     fetchTemplates();
+    const interval = setInterval(() => fetchTemplates(true), 5000);
+    return () => clearInterval(interval);
   }, [filterSubject]);
 
-  const fetchTemplates = async () => {
-    setLoading(true);
+  const fetchTemplates = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const url = new URL(`${API_URL}/api/admin/templates`);
       if (filterSubject) url.searchParams.append('subjectId', filterSubject);
@@ -49,10 +51,10 @@ export default function TemplatesManager() {
         const data = await res.json();
         setTemplates(data);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
