@@ -50,6 +50,7 @@ enum QuestionType {
   MCQ
   ESSAY
   MATH
+  PROBLEM_SOLVING
 }
 
 model Question {
