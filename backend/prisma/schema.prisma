@@ -60,6 +60,7 @@ enum QuestionType {
   ESSAY
   MATH
   PROBLEM_SOLVING
+  FILL_IN_BLANKS
 }
 
 model Question {
