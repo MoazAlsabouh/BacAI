@@ -86,9 +86,14 @@ export default function Statistics() {
   // Formatting data for charts
   const typeChartData = subjectStats ? [
     { name: 'أتمتة (MCQ)', value: subjectStats.questionsByType.MCQ || 0 },
+    { name: 'صح وخطأ (TRUE_FALSE)', value: subjectStats.questionsByType.TRUE_FALSE || 0 },
+    { name: 'مزاوجة (MATCHING)', value: subjectStats.questionsByType.MATCHING || 0 },
+    { name: 'ترتيب (ORDERING)', value: subjectStats.questionsByType.ORDERING || 0 },
+    { name: 'املاء الفراغات (FILL_IN_BLANKS)', value: subjectStats.questionsByType.FILL_IN_BLANKS || 0 },
     { name: 'مقالي (ESSAY)', value: subjectStats.questionsByType.ESSAY || 0 },
     { name: 'مسائل (PROBLEM_SOLVING)', value: subjectStats.questionsByType.PROBLEM_SOLVING || 0 },
-    { name: 'املاء الفراغات (FILL_IN_BLANKS)', value: subjectStats.questionsByType.FILL_IN_BLANKS || 0 },
+    { name: 'نصوص (COMPREHENSION)', value: subjectStats.questionsByType.COMPREHENSION || 0 },
+    { name: 'رسم/مخطط (DIAGRAM)', value: subjectStats.questionsByType.DIAGRAM || 0 },
   ] : [];
 
   const difficultyChartData = subjectStats ? Object.keys(subjectStats.questionsByDifficulty).map(key => ({

@@ -57,10 +57,15 @@ model SourceMaterial {
 
 enum QuestionType {
   MCQ
+  TRUE_FALSE
+  MATCHING
+  ORDERING
+  FILL_IN_BLANKS
   ESSAY
   MATH
   PROBLEM_SOLVING
-  FILL_IN_BLANKS
+  COMPREHENSION
+  DIAGRAM
 }
 
 model Question {

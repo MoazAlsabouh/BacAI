@@ -100,9 +100,14 @@ export default function QuestionBank() {
             >
               <option value="">كل الأنماط</option>
               <option value="MCQ">أتمتة (MCQ)</option>
-              <option value="PROBLEM_SOLVING">مسائل (PROBLEM_SOLVING)</option>
-              <option value="ESSAY">مقالي (ESSAY)</option>
+              <option value="TRUE_FALSE">صح وخطأ (TRUE_FALSE)</option>
+              <option value="MATCHING">مزاوجة (MATCHING)</option>
+              <option value="ORDERING">ترتيب (ORDERING)</option>
               <option value="FILL_IN_BLANKS">املاء الفراغات (FILL_IN_BLANKS)</option>
+              <option value="ESSAY">مقالي (ESSAY)</option>
+              <option value="PROBLEM_SOLVING">مسائل (PROBLEM_SOLVING)</option>
+              <option value="COMPREHENSION">نصوص (COMPREHENSION)</option>
+              <option value="DIAGRAM">رسم/مخطط (DIAGRAM)</option>
             </select>
 
             <select 
