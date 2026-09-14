@@ -202,8 +202,8 @@ export default function ExamOnline() {
              activeQuestionData.type === 'FILL_IN_BLANKS' ? 'سؤال إملاء فراغات' :
              activeQuestionData.type === 'PROBLEM_SOLVING' ? 'مسألة شاملة' : 'سؤال مقالي'}
           </span>
-          <h3 className="text-xl text-gray-800 font-medium leading-relaxed">
-            <Latex>{activeQuestionData.content}</Latex>
+          <h3 className="text-xl text-gray-800 font-medium leading-relaxed whitespace-pre-wrap">
+            <Latex>{activeQuestionData.content.replace(/\\n/g, '\n')}</Latex>
           </h3>
         </div>
 
@@ -223,8 +223,8 @@ export default function ExamOnline() {
                   onChange={(e) => handleAnswerChange(e.target.value)}
                   className="w-5 h-5 text-primary focus:ring-primary shrink-0"
                 />
-                <span className="text-gray-700">
-                  <Latex>{opt}</Latex>
+                <span className="text-gray-700 whitespace-pre-wrap">
+                  <Latex>{opt.replace(/\\n/g, '\n')}</Latex>
                 </span>
               </label>
             )) : <p className="text-gray-500 italic">لا توجد خيارات متاحة لهذا السؤال</p>}

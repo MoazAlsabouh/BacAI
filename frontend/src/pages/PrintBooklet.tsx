@@ -132,16 +132,18 @@ export default function PrintBooklet() {
                       {/* Render question content with a number */}
                       <div className="flex gap-2 text-md font-semibold">
                         <span className="min-w-[24px]">{qIdx + 1}-</span>
-                        <div className="flex-1 whitespace-pre-wrap leading-relaxed"><Latex>{q.content}</Latex></div>
+                        <div className="flex-1 whitespace-pre-wrap leading-relaxed">
+                          <Latex>{q.content.replace(/\\n/g, '\n')}</Latex>
+                        </div>
                       </div>
 
                       {/* Render MCQ options horizontally if they exist */}
-                      {q.qType === 'MCQ' || q.type === 'MCQ' && q.options && (
+                      {(q.qType === 'MCQ' || q.type === 'MCQ') && q.options && (
                         <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 ${isForeignLanguage ? 'pl-8' : 'pr-8'}`}>
                           {q.options.map((opt: string, oIdx: number) => (
                             <div key={oIdx} className="flex gap-2">
                               <span className="font-bold">{String.fromCharCode(isForeignLanguage ? 97 + oIdx : 1571 + oIdx)}-</span> 
-                              <span><Latex>{opt}</Latex></span>
+                              <span><Latex>{opt.replace(/\\n/g, '\n')}</Latex></span>
                             </div>
                           ))}
                         </div>
