@@ -188,16 +188,14 @@ export default function Statistics() {
             {/* Pie Chart: Questions by Type */}
             <div className="border border-gray-200 rounded-2xl p-6">
               <h3 className="font-bold text-gray-800 mb-6 text-center">توزع الأسئلة حسب النمط</h3>
-              <div className="h-64 w-full">
+              <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={typeChartData}
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      outerRadius={90}
                       fill="#8884d8"
                       dataKey="value"
                     >
@@ -206,7 +204,7 @@ export default function Statistics() {
                       ))}
                     </Pie>
                     <RechartsTooltip />
-                    <Legend />
+                    <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ paddingTop: "20px" }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
