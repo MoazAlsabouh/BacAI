@@ -41,7 +41,7 @@ export default function PrintBooklet() {
         {`
           @media print {
             @page {
-              margin: 0; /* Removes browser header/footer URL and Date */
+              margin: 15mm;
               size: A4;
             }
             body {
@@ -50,27 +50,11 @@ export default function PrintBooklet() {
             .no-print {
               display: none !important;
             }
-            .print-page {
-              padding: 15mm;
-              page-break-after: always;
-            }
-            .print-page:last-child {
-              page-break-after: auto;
+            .page-break {
+              page-break-before: always;
             }
             .avoid-break {
               page-break-inside: avoid;
-            }
-          }
-          /* Screen styles to match paper layout */
-          @media screen {
-            .print-page {
-              padding: 15mm;
-              margin-bottom: 2rem;
-              background: white;
-              box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-              max-width: 210mm;
-              margin-left: auto;
-              margin-right: auto;
             }
           }
         `}
@@ -93,7 +77,7 @@ export default function PrintBooklet() {
       </div>
 
       {exams.map((exam: any, idx: number) => (
-        <div key={idx} className="print-page">
+        <div key={idx} className={idx > 0 ? "page-break" : ""}>
           {/* Ministry Header - Always RTL */}
           <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6" dir="rtl">
             <div className="text-right">
