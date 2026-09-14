@@ -9,6 +9,7 @@ import QuestionBank from './pages/admin/QuestionBank';
 import TemplatesManager from './pages/admin/TemplatesManager';
 
 import ExamOnline from './pages/ExamOnline';
+import PrintBooklet from './pages/PrintBooklet';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const isAdminLoggedIn = !!localStorage.getItem('adminToken');
@@ -79,6 +80,7 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<StudentPortal />} />
+          <Route path="/print-booklet" element={<PrintBooklet />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/exam/:attemptId" element={<ExamOnline />} />
           

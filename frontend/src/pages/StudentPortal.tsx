@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileDown, PlayCircle, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 
 // Suppress KaTeX warnings about Arabic characters
@@ -12,6 +13,7 @@ console.warn = (...args) => {
 };
 
 export default function StudentPortal() {
+  const navigate = useNavigate();
   const [subjectId, setSubjectId] = useState('');
   const [branch, setBranch] = useState('SCIENTIFIC');
   const [examCount, setExamCount] = useState(1);
@@ -57,10 +59,19 @@ export default function StudentPortal() {
       
       console.log('Exams generated:', data);
       
-      setTimeout(() => {
-        setPdfReady(true);
-        setLoading(false);
-      }, 1500);
+      const selectedSubject = subjects.find((s: any) => s.id === subjectId);
+      
+      setPdfReady(true);
+      setLoading(false);
+      
+      // Navigate to the print page in a new window behavior via router state
+      navigate('/print-booklet', { 
+        state: { 
+          exams: data.exams, 
+          subjectName: selectedSubject?.name || '',
+          branch: branch
+        } 
+      });
       
     } catch (error) {
       console.error(error);
