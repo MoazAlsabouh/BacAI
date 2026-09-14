@@ -130,17 +130,17 @@ export default function PrintBooklet() {
                   {section.questions.map((q: any, qIdx: number) => (
                     <div key={q.id} className="avoid-break mb-4">
                       {/* Render question content with a number */}
-                      <div className="flex gap-2 text-md font-semibold" dir="ltr" style={{ textAlign: 'right' }}>
-                        <span className="min-w-[24px]" dir="rtl">{qIdx + 1}-</span>
+                      <div className="flex gap-2 text-md font-semibold">
+                        <span className="min-w-[24px]">{qIdx + 1}-</span>
                         <div className="flex-1 whitespace-pre-wrap leading-relaxed"><Latex>{q.content}</Latex></div>
                       </div>
 
                       {/* Render MCQ options horizontally if they exist */}
-                      {q.type === 'MCQ' && q.options && (
-                        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 ml-8 ${isForeignLanguage ? 'pr-8' : 'pr-8'}`} dir="ltr" style={{ textAlign: 'right' }}>
+                      {q.qType === 'MCQ' || q.type === 'MCQ' && q.options && (
+                        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 ${isForeignLanguage ? 'pl-8' : 'pr-8'}`}>
                           {q.options.map((opt: string, oIdx: number) => (
                             <div key={oIdx} className="flex gap-2">
-                              <span className="font-bold" dir="rtl">{String.fromCharCode(isForeignLanguage ? 97 + oIdx : 1571 + oIdx)}-</span> 
+                              <span className="font-bold">{String.fromCharCode(isForeignLanguage ? 97 + oIdx : 1571 + oIdx)}-</span> 
                               <span><Latex>{opt}</Latex></span>
                             </div>
                           ))}

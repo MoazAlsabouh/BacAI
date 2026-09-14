@@ -150,7 +150,7 @@ export default function ExamOnline() {
                     </div>
 
                     {q.type === 'MCQ' ? (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200" dir="ltr" style={{ textAlign: 'right' }}>
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200">
                         <CheckCircle size={20} className="shrink-0" />
                         <span>الإجابة الصحيحة هي: <Latex>{q.correctAnswer || 'غير متوفرة'}</Latex></span>
                       </div>
@@ -202,7 +202,7 @@ export default function ExamOnline() {
              activeQuestionData.type === 'FILL_IN_BLANKS' ? 'سؤال إملاء فراغات' :
              activeQuestionData.type === 'PROBLEM_SOLVING' ? 'مسألة شاملة' : 'سؤال مقالي'}
           </span>
-          <h3 className="text-xl text-gray-800 font-medium leading-relaxed" dir="ltr" style={{ textAlign: 'right' }}>
+          <h3 className="text-xl text-gray-800 font-medium leading-relaxed">
             <Latex>{activeQuestionData.content}</Latex>
           </h3>
         </div>
@@ -223,7 +223,7 @@ export default function ExamOnline() {
                   onChange={(e) => handleAnswerChange(e.target.value)}
                   className="w-5 h-5 text-primary focus:ring-primary shrink-0"
                 />
-                <span className="text-gray-700" dir="ltr" style={{ textAlign: 'right' }}>
+                <span className="text-gray-700">
                   <Latex>{opt}</Latex>
                 </span>
               </label>
