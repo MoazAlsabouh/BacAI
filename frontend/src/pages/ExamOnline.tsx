@@ -193,7 +193,14 @@ export default function ExamOnline() {
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6">
         <div className="mb-8">
           <span className="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded-md text-xs font-bold mb-4">
-            {activeQuestionData.type === 'MCQ' ? 'سؤال أتمتة' : 'سؤال مقالي'}
+            {activeQuestionData.type === 'MCQ' ? 'سؤال أتمتة' : 
+             activeQuestionData.type === 'TRUE_FALSE' ? 'سؤال صح وخطأ' :
+             activeQuestionData.type === 'COMPREHENSION' ? 'تحليل نص قراءة' :
+             activeQuestionData.type === 'MATCHING' ? 'سؤال مزاوجة وتوصيل' :
+             activeQuestionData.type === 'ORDERING' ? 'سؤال ترتيب' :
+             activeQuestionData.type === 'DIAGRAM' ? 'سؤال يعتمد على شكل/مخطط' :
+             activeQuestionData.type === 'FILL_IN_BLANKS' ? 'سؤال إملاء فراغات' :
+             activeQuestionData.type === 'PROBLEM_SOLVING' ? 'مسألة شاملة' : 'سؤال مقالي'}
           </span>
           <h3 className="text-xl text-gray-800 font-medium leading-relaxed" dir="ltr" style={{ textAlign: 'right' }}>
             <Latex>{activeQuestionData.content}</Latex>
@@ -226,14 +233,14 @@ export default function ExamOnline() {
           <div>
             <textarea 
               rows={8}
-              placeholder="اكتب إجابتك هنا بوضوح..."
+              placeholder="اكتب إجابتك هنا بوضوح (مثال: 1- صح، 2- غلط / أو اشرح فكرتك)..."
               value={answers[activeQuestionData.id] || ''}
               onChange={(e) => handleAnswerChange(e.target.value)}
               className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary outline-none resize-none"
             ></textarea>
             <div className="mt-4 flex items-start gap-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
               <Bot className="shrink-0 mt-0.5" size={16} />
-              <p>سيقوم الذكاء الاصطناعي بتصحيح إجابتك بناءً على المعنى، لذا لا تقلق إذا لم تتذكر الصياغة الحرفية للكتاب، ركز على إيصال الأفكار العلمية الصحيحة.</p>
+              <p>سيقوم الذكاء الاصطناعي بمقارنة وتصحيح إجابتك بناءً على سلم التصحيح. إذا كان السؤال يحوي عدة طلبات، رقم إجاباتك بوضوح لتسهيل التصحيح.</p>
             </div>
           </div>
         )}
