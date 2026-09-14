@@ -1,5 +1,16 @@
 import { useLocation, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
+
+// Suppress KaTeX warnings about Arabic characters
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && (args[0].includes('LaTeX-incompatible') || args[0].includes('No character metrics'))) {
+    return;
+  }
+  originalWarn(...args);
+};
 
 export default function PrintBooklet() {
   const location = useLocation();
@@ -61,7 +72,7 @@ export default function PrintBooklet() {
           onClick={() => window.print()} 
           className="bg-blue-600 text-white px-8 py-3 rounded-full shadow-lg font-bold hover:bg-blue-700 transition"
         >
-          🖨️ طباعة الـ PDF
+          🖨️ حفظ كـ PDF / طباعة
         </button>
       </div>
 
@@ -103,18 +114,18 @@ export default function PrintBooklet() {
                   {section.questions.map((q: any, qIdx: number) => (
                     <div key={q.id} className="avoid-break mb-4">
                       {/* Render question content with a number */}
-                      <div className="flex gap-2 text-md font-semibold">
-                        <span className="min-w-[24px]">{qIdx + 1}-</span>
-                        <div className="flex-1 whitespace-pre-wrap leading-relaxed">{q.content}</div>
+                      <div className="flex gap-2 text-md font-semibold" dir="ltr" style={{ textAlign: 'right' }}>
+                        <span className="min-w-[24px]" dir="rtl">{qIdx + 1}-</span>
+                        <div className="flex-1 whitespace-pre-wrap leading-relaxed"><Latex>{q.content}</Latex></div>
                       </div>
 
                       {/* Render MCQ options horizontally if they exist */}
                       {q.type === 'MCQ' && q.options && (
-                        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 ml-8 ${isForeignLanguage ? 'pr-8' : 'pr-8'}`}>
+                        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 ml-8 ${isForeignLanguage ? 'pr-8' : 'pr-8'}`} dir="ltr" style={{ textAlign: 'right' }}>
                           {q.options.map((opt: string, oIdx: number) => (
                             <div key={oIdx} className="flex gap-2">
-                              <span className="font-bold">{String.fromCharCode(isForeignLanguage ? 97 + oIdx : 1571 + oIdx)}-</span> 
-                              <span>{opt}</span>
+                              <span className="font-bold" dir="rtl">{String.fromCharCode(isForeignLanguage ? 97 + oIdx : 1571 + oIdx)}-</span> 
+                              <span><Latex>{opt}</Latex></span>
                             </div>
                           ))}
                         </div>
