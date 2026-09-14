@@ -77,20 +77,25 @@ function Layout({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<StudentPortal />} />
-          <Route path="/print-booklet" element={<PrintBooklet />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/exam/:attemptId" element={<ExamOnline />} />
-          
-          <Route path="/admin" element={<AdminLayout><Statistics /></AdminLayout>} />
-          <Route path="/admin/stats" element={<AdminLayout><Statistics /></AdminLayout>} />
-          <Route path="/admin/upload" element={<AdminLayout><UploadMaterial /></AdminLayout>} />
-          <Route path="/admin/questions" element={<AdminLayout><QuestionBank /></AdminLayout>} />
-          <Route path="/admin/templates" element={<AdminLayout><TemplatesManager /></AdminLayout>} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/print-booklet" element={<PrintBooklet />} />
+        
+        <Route path="/*" element={
+          <Layout>
+            <Routes>
+              <Route path="/" element={<StudentPortal />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/exam/:attemptId" element={<ExamOnline />} />
+              
+              <Route path="/admin" element={<AdminLayout><Statistics /></AdminLayout>} />
+              <Route path="/admin/stats" element={<AdminLayout><Statistics /></AdminLayout>} />
+              <Route path="/admin/upload" element={<AdminLayout><UploadMaterial /></AdminLayout>} />
+              <Route path="/admin/questions" element={<AdminLayout><QuestionBank /></AdminLayout>} />
+              <Route path="/admin/templates" element={<AdminLayout><TemplatesManager /></AdminLayout>} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
     </Router>
   );
 }
